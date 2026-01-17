@@ -1,0 +1,23 @@
+Метаданные
+apk_name,test.apk
+apk_path,c:\Users\Yangin\Desktop\blablabla2\downloads_test\test.apk
+file_size,10673788
+last_modified,2026-01-13 16:44:27
+analysis_date,2026-01-13T16:44:27.120643
+report_version,1.0
+
+Разрешения
+Общее количество,3
+Список разрешений
+android.permission.INTERNET
+com.example.test.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+android.permission.READ_CALENDAR
+
+Оценка безопасности
+risk_level,низкий
+suspicious_score,0
+dangerous_permissions_count,0
+warnings,[]
+
+Рекомендации
+"Приложение выглядит безопасным, но всегда проверяйте отзывы разработчиков"

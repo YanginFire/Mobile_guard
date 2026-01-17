@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  flet-app:
+    build: .
+    container_name: mobile-guard-flet
+    ports:
+      - "8000:8000"   # Flet приложение
+      - "8001:8001"   # Prometheus метрики
+    volumes:
+      - ./analysis_reports:/app/analysis_reports
+      - ./downloads_test:/app/downloads_test
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 8001 | grep LISTEN || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mobile-guard-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - monitoring
+    depends_on:
+      - flet-app
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mobile-guard-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  monitoring:
+    driver: bridge
